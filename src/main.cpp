@@ -10,9 +10,14 @@ void setup() {
 
 void loop() {
     float temperature = sensor.getTemperature();
+    float pressure = sensor.getPressure();
     Serial.print("Temperature: ");
     Serial.print(temperature);
-    Serial.print("*C");
+    Serial.println("°C");
+    Serial.println("==========================");
+    Serial.print("Pressure: ");
+    Serial.print(pressure);
+    Serial.println("hPa");
     Serial.println("==========================");
     delay(1000);
 }
