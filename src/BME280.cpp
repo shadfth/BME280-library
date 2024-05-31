@@ -3,16 +3,16 @@
 BME280::BME280(uint8_t sensor_address)
     : _sensor_address(sensor_address) {}
 
-bool BME280::begin()
+bool BME280::begin(uint8_t mode)
 {
     Wire.begin();
     readCalibrationData();
 
     Wire.beginTransmission(_sensor_address);
-    Wire.write(0xF2); // ctrl_hum register
-    Wire.write(0x01); // humidity oversampling x1
-    Wire.write(0xF4); // ctrl_meas register
-    Wire.write(0x27); // temp and pressure oversampling x1, mode normal
+    Wire.write(ctrl_hum); // ctrl_hum register
+    Wire.write(humidty_oversampling); // humidity oversampling x1
+    Wire.write(control_address); // ctrl_meas register
+    Wire.write(mode); // temp and pressure oversampling x1, mode
     Wire.endTransmission();
 
     return true;
@@ -35,9 +35,14 @@ void BME280::readCalibrationData()
     dig_H1 = read8(dig_H1_address);
     dig_H2 = readS16_lsb(dig_H2_lsb_address);
     dig_H3 = read8(dig_H3_address);
-    dig_H4 = (int16_t)(read8(dig_H4_msb_address) << 4 | read8(dig_H4_lsb_address) & 0b00001111);
+    dig_H4 = (int16_t)((read8(dig_H4_msb_address) << 4 | read8(dig_H4_lsb_address) & 0b00001111));
     dig_H5 = (int16_t)((read8(dig_H5_lsb_address) & 0b11110000) >> 4 | read8(dig_H5_msb_address) << 4);
     dig_H6 = read8S(dig_H6_address);
+
+}
+
+void BME280::changeMode(){
+
 
 }
 
