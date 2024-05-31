@@ -44,8 +44,10 @@ private:
     const uint8_t dig_H4_lsb_address = 0xe5;
     const uint8_t dig_H5_lsb_address = 0xe5;
     const uint8_t dig_H5_msb_address = 0xe6;
+    const uint8_t dig_H6_address = 0xe7;
     uint8_t _sensor_address;
     uint8_t _address;
+    int8_t dig_H6;
     uint8_t dig_H1, dig_H3;
     uint16_t dig_T1, dig_P1;
     int16_t dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9, dig_H2, dig_H4, dig_H5;
@@ -53,6 +55,7 @@ private:
 
     void readCalibrationData();
     uint8_t read8(uint8_t reg);
+    int8_t read8S(uint8_t reg);
     uint16_t read16_lsb(uint8_t reg);
     uint16_t read16_msb(uint8_t reg);
     int16_t readS16_lsb(uint8_t reg);
@@ -60,12 +63,14 @@ private:
     int32_t read24(uint8_t reg);
     int32_t compensateTemperature(int32_t adc_T);
     uint32_t compensatePressure(int32_t adc_P);
+    uint32_t compensateHumidity(int32_t adc_H);
 
 public:
     BME280(uint8_t sensor_address = 0x76);
     bool begin();
     float getTemperature();
     float getPressure();
+    float getHumidity();
     void changeMode();
 };
 
