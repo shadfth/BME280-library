@@ -130,9 +130,9 @@ float BME280::getPressure() {
 }
 
 float BME280::getHumidity() {
-    int32_t adc_H = read24(hum_address) >> 4;
+    int32_t adc_H = read16_msb(hum_address);
     uint32_t humidity = compensateHumidity(adc_H);
-    return humidity / 1024;
+    return humidity / 1024.0;
 }
 
 // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
