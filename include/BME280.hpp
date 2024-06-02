@@ -6,9 +6,6 @@
 class BME280
 {
 private:
-    const uint8_t normal_mode = 0x27;
-    const uint8_t force_mode = 0x25;
-    const uint8_t normal_mode = 0x24;
     const uint8_t humidty_oversampling = 0x01;
     const uint8_t ctrl_hum = 0xf2;
     const uint8_t config_address = 0xF5;
@@ -73,11 +70,20 @@ private:
 
 public:
     BME280(uint8_t sensor_address = 0x76);
+    const uint8_t normal_mode = 0x27;
+    const uint8_t force_mode = 0x25;
+    const uint8_t sleep_mode = 0x24;
+        
+    struct SensorData {
+    float temperature;
+    float pressure;
+    float humidity;
+    };
     bool begin(uint8_t mode);
+    SensorData getAll();
     float getTemperature();
     float getPressure();
     float getHumidity();
-    void changeMode();
 };
 
 #endif // BME280_HPP

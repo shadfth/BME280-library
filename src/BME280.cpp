@@ -9,10 +9,10 @@ bool BME280::begin(uint8_t mode)
     readCalibrationData();
 
     Wire.beginTransmission(_sensor_address);
-    Wire.write(ctrl_hum); // ctrl_hum register
+    Wire.write(ctrl_hum);             // ctrl_hum register
     Wire.write(humidty_oversampling); // humidity oversampling x1
-    Wire.write(control_address); // ctrl_meas register
-    Wire.write(mode); // temp and pressure oversampling x1, mode
+    Wire.write(control_address);      // ctrl_meas register
+    Wire.write(mode);                 // temp and pressure oversampling x1, mode
     Wire.endTransmission();
 
     return true;
@@ -38,15 +38,11 @@ void BME280::readCalibrationData()
     dig_H4 = (int16_t)((read8(dig_H4_msb_address) << 4 | read8(dig_H4_lsb_address) & 0b00001111));
     dig_H5 = (int16_t)((read8(dig_H5_lsb_address) & 0b11110000) >> 4 | read8(dig_H5_msb_address) << 4);
     dig_H6 = read8S(dig_H6_address);
-
 }
 
-void BME280::changeMode(){
 
-
-}
-
-uint8_t BME280::read8(uint8_t reg){
+uint8_t BME280::read8(uint8_t reg)
+{
     uint8_t value;
     Wire.beginTransmission(_sensor_address);
     Wire.write(reg);
@@ -60,6 +56,7 @@ int8_t BME280::read8S(uint8_t reg)
 {
     return (int8_t)read8(reg);
 }
+
 uint16_t BME280::read16_lsb(uint8_t reg)
 {
     uint16_t value;
@@ -107,62 +104,72 @@ int32_t BME280::read24(uint8_t reg)
     return (int32_t)value;
 }
 
-
-
-
-
-// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
-// t_fine carries fine temperature as global value
-int32_t BME280::compensateTemperature(int32_t adc_T) {
-  int32_t var1, var2, T;
-  var1 = ((((adc_T >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
-  var2 = (((((adc_T >> 4) - ((int32_t)dig_T1)) * ((adc_T >> 4) - ((int32_t)dig_T1))) >> 12) * ((int32_t)dig_T3)) >> 14;
-  t_fine = var1 + var2;
-  T = (t_fine * 5 + 128) >> 8;
-  return T;
+float BME280::getTemperature()
+{
+    int32_t adc_T = read24(temp_address) >> 4;
+    int32_t temp = compensateTemperature(adc_T);
+    return temp / 100.0;
 }
 
-float BME280::getTemperature() {
-  int32_t adc_T = read24(temp_address) >> 4;
-  int32_t temp = compensateTemperature(adc_T);
-  return temp / 100.0;
-}
-
-float BME280::getPressure() {
+float BME280::getPressure()
+{
     int32_t adc_P = read24(pressure_address) >> 4;
     uint32_t press = compensatePressure(adc_P);
     return press / 25600.0;
 }
 
-float BME280::getHumidity() {
+
+
+float BME280::getHumidity()
+{
     int32_t adc_H = read16_msb(hum_address);
     uint32_t humidity = compensateHumidity(adc_H);
     return humidity / 1024.0;
+}
+
+BME280::SensorData BME280::getAll() {
+    SensorData data;
+    data.temperature = getTemperature();
+    data.pressure = getPressure();
+    data.humidity = getHumidity();
+    return data;
+}
+
+
+// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
+// t_fine carries fine temperature as global value
+int32_t BME280::compensateTemperature(int32_t adc_T)
+{
+    int32_t var1, var2, T;
+    var1 = ((((adc_T >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
+    var2 = (((((adc_T >> 4) - ((int32_t)dig_T1)) * ((adc_T >> 4) - ((int32_t)dig_T1))) >> 12) * ((int32_t)dig_T3)) >> 14;
+    t_fine = var1 + var2;
+    T = (t_fine * 5 + 128) >> 8;
+    return T;
 }
 
 // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
 // Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
 uint32_t BME280::compensatePressure(int32_t adc_P)
 {
-int64_t var1, var2, p;
-var1 = ((int64_t)t_fine) - 128000;
-var2 = var1 * var1 * (int64_t)dig_P6;
-var2 = var2 + ((var1*(int64_t)dig_P5)<<17);
-var2 = var2 + (((int64_t)dig_P4)<<35);
-var1 = ((var1 * var1 * (int64_t)dig_P3)>>8) + ((var1 * (int64_t)dig_P2)<<12);
-var1 = (((((int64_t)1)<<47)+var1))*((int64_t)dig_P1)>>33;
-if (var1 == 0)
-{
-return 0; // avoid exception caused by division by zero
+    int64_t var1, var2, p;
+    var1 = ((int64_t)t_fine) - 128000;
+    var2 = var1 * var1 * (int64_t)dig_P6;
+    var2 = var2 + ((var1 * (int64_t)dig_P5) << 17);
+    var2 = var2 + (((int64_t)dig_P4) << 35);
+    var1 = ((var1 * var1 * (int64_t)dig_P3) >> 8) + ((var1 * (int64_t)dig_P2) << 12);
+    var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)dig_P1) >> 33;
+    if (var1 == 0)
+    {
+        return 0; // avoid exception caused by division by zero
+    }
+    p = 1048576 - adc_P;
+    p = (((p << 31) - var2) * 3125) / var1;
+    var1 = (((int64_t)dig_P9) * (p >> 13) * (p >> 13)) >> 25;
+    var2 = (((int64_t)dig_P8) * p) >> 19;
+    p = ((p + var1 + var2) >> 8) + (((int64_t)dig_P7) << 4);
+    return (uint32_t)(p);
 }
-p = 1048576-adc_P;
-p = (((p<<31)-var2)*3125)/var1;
-var1 = (((int64_t)dig_P9) * (p>>13) * (p>>13)) >> 25;
-var2 = (((int64_t)dig_P8) * p) >> 19;
-p = ((p + var1 + var2) >> 8) + (((int64_t)dig_P7)<<4);
-return (uint32_t)(p);
-}
-
 
 // Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
 // Output value of “47445” represents 47445/1024 = 46.333 %RH
