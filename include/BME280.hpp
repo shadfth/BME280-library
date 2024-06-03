@@ -75,9 +75,9 @@ public:
     const uint8_t sleep_mode = 0x24;
         
     struct SensorData {
-    float temperature;
-    float pressure;
-    float humidity;
+        float temperature;
+        float pressure;
+        float humidity;
     };
     bool begin(uint8_t mode);
     SensorData getAll();
