@@ -3,3 +3,5 @@
 platformio.ini
 test*
 lib*
+html/
+latex/

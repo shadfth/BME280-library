@@ -1,11 +1,25 @@
+// =============================================================
+//
+// File         : BME280.hpp
+// Copyright    : shad.fatah@student.hu.nl 2024
+//
+// =============================================================
+
+// this file contains Doxygen comments
+/// @file BME280.hpp
+
 #ifndef BME280_HPP
 #define BME280_HPP
 
 #include <Wire.h>
 
+/**
+ * @class BME280 BME280.hpp 
+*/
 class BME280
 {
 private:
+    /// @brief const variable addresses and writing data addresses.
     const uint8_t humidty_oversampling = 0x01;
     const uint8_t ctrl_hum = 0xf2;
     const uint8_t config_address = 0xF5;
@@ -14,6 +28,8 @@ private:
     const uint8_t temp_address = 0xFA;
     const uint8_t hum_address = 0xFD;
     const uint8_t complete_data_address = 0xF7;
+
+    /// @brief constant compensation data addresses.
     const uint8_t dig_T1_lsb_address = 0x88;
     const uint8_t dig_T1_msb_address = 0x89;
     const uint8_t dig_T2_lsb_address = 0x8a;
@@ -47,15 +63,19 @@ private:
     const uint8_t dig_H5_lsb_address = 0xe5;
     const uint8_t dig_H5_msb_address = 0xe6;
     const uint8_t dig_H6_address = 0xe7;
-    
+
+    /// @brief declaring sensor address
     uint8_t _sensor_address;
-    uint8_t _address;
+
+
+    /// @brief compensation data.
     int8_t dig_H6;
     uint8_t dig_H1, dig_H3;
     uint16_t dig_T1, dig_P1;
     int16_t dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9, dig_H2, dig_H4, dig_H5;
     int32_t t_fine;
 
+    /// @brief function to read all of the calibration.
     void readCalibrationData();
     uint8_t read8(uint8_t reg);
     int8_t read8S(uint8_t reg);

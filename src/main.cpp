@@ -34,5 +34,7 @@ void loop() {
         digitalWrite(IN2_PIN, HIGH);
     }
     Serial.println(temperature);
+    Serial.println(data.pressure);
+
     delay(5000);
 }
