@@ -35,7 +35,7 @@ void BME280::readCalibrationData()
     dig_H1 = read8(dig_H1_address);
     dig_H2 = readS16_lsb(dig_H2_lsb_address);
     dig_H3 = read8(dig_H3_address);
-    dig_H4 = (int16_t)((read8(dig_H4_msb_address) << 4 | read8(dig_H4_lsb_address) & 0b00001111));
+    dig_H4 = (int16_t)(read8(dig_H4_msb_address) << 4 | (read8(dig_H4_lsb_address) & 0b00001111));
     dig_H5 = (int16_t)((read8(dig_H5_lsb_address) & 0b11110000) >> 4 | read8(dig_H5_msb_address) << 4);
     dig_H6 = read8S(dig_H6_address);
 }
@@ -113,6 +113,7 @@ float BME280::getTemperature()
 
 float BME280::getPressure()
 {
+    getTemperature();
     int32_t adc_P = read24(pressure_address) >> 4;
     uint32_t press = compensatePressure(adc_P);
     return press / 25600.0;
@@ -122,6 +123,7 @@ float BME280::getPressure()
 
 float BME280::getHumidity()
 {
+    getTemperature();
     int32_t adc_H = read16_msb(hum_address);
     uint32_t humidity = compensateHumidity(adc_H);
     return humidity / 1024.0;
