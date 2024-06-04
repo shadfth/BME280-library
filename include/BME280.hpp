@@ -5,7 +5,7 @@
 //
 // =============================================================
 
-// This file contains Doxygen comments
+// This file contains Doxygen comments.
 /// @file BME280.hpp
 
 #ifndef BME280_HPP
